@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SimbaOps</title>
+  <meta name="description" content="SimbaOps is a fast, focused launch hub for flight ops tools including KC-135 Time Calc and Alternate Watch.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://simbaops.com/">
+  <meta property="og:title" content="SimbaOps">
+  <meta property="og:description" content="Flight ops tools with charge. Launch KC-135 Time Calc and Alternate Watch from one focused hub.">
+  <meta property="og:image" content="https://simbaops.com/assets/simba-logo.webp">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="SimbaOps">
+  <meta name="twitter:description" content="Flight ops tools with charge. Launch KC-135 Time Calc and Alternate Watch from one focused hub.">
+  <meta name="twitter:image" content="https://simbaops.com/assets/simba-logo.webp">
+  <link rel="canonical" href="https://simbaops.com/">
+  <link rel="icon" href="assets/favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="assets/favicon.png">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #050607;
+      --ink: #f8f0df;
+      --muted: #a5b0b8;
+      --line: rgba(255, 255, 255, 0.13);
+      --gold: #d7a649;
+      --gold-2: #ffe7ad;
+      --cyan: #63d8ff;
+      --green: #65efad;
+      --shadow: 0 24px 90px rgba(0, 0, 0, 0.56);
+      --stack-space: clamp(10px, 1.6vh, 16px);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 50% -12%, rgba(215, 166, 73, 0.22), transparent 29rem),
+        radial-gradient(circle at 82% 28%, rgba(99, 216, 255, 0.1), transparent 26rem),
+        linear-gradient(180deg, #080a0b 0%, #050607 58%, #08090a 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -3;
+      opacity: 0.23;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+      background-size: 58px 58px;
+      mask-image: linear-gradient(180deg, black, transparent 72%);
+      pointer-events: none;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      opacity: 0.16;
+      background:
+        repeating-conic-gradient(from -18deg at 50% 34%, rgba(255, 231, 173, 0.18) 0deg 1deg, transparent 1deg 16deg),
+        radial-gradient(circle at 50% 34%, transparent 0 9rem, rgba(99, 216, 255, 0.08) 9rem 9.1rem, transparent 9.1rem 19rem);
+      mask-image: radial-gradient(circle at 50% 34%, black 0, transparent 36rem);
+      pointer-events: none;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .page {
+      min-height: 100svh;
+      position: relative;
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) auto;
+      align-content: stretch;
+      gap: clamp(8px, 1.4vh, 14px);
+      padding: clamp(8px, 1.6vh, 16px) clamp(14px, 4vw, 58px) clamp(8px, 1.6vh, 16px);
+      overflow: hidden;
+    }
+
+    .spark-field {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      overflow: hidden;
+      mask-image: radial-gradient(circle at 50% 34%, transparent 0 6.4rem, black 7.4rem 35rem, transparent 39rem);
+    }
+
+    .spark {
+      --angle: -90deg;
+      --distance: 420px;
+      --delay: 0s;
+      --duration: 9s;
+      --color: rgba(255, 231, 173, 0.86);
+      position: absolute;
+      top: 34%;
+      left: 50%;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--color);
+      box-shadow: 0 0 10px var(--color), 0 0 20px var(--color);
+      opacity: 0;
+      transform: translate(-50%, -50%) rotate(var(--angle)) translateY(6.5rem);
+      animation: sparkTravel var(--duration) linear infinite;
+      animation-delay: var(--delay);
+    }
+
+    .intro-mark img {
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid rgba(255, 231, 173, 0.46);
+      box-shadow: 0 0 34px rgba(215, 166, 73, 0.32);
+    }
+
+    .hero {
+      display: grid;
+      place-items: center;
+      min-height: 0;
+      padding: 0;
+    }
+
+    .hero-inner {
+      width: min(1040px, 100%);
+      display: grid;
+      justify-items: center;
+      gap: var(--stack-space);
+      text-align: center;
+    }
+
+    .intro-mark {
+      width: clamp(86px, 10.5vh, 112px);
+      height: clamp(86px, 10.5vh, 112px);
+      display: grid;
+      place-items: center;
+      position: relative;
+      isolation: isolate;
+      animation: introLift 620ms ease both;
+    }
+
+    .intro-mark::before,
+    .intro-mark::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      z-index: -1;
+    }
+
+    .intro-mark::before {
+      inset: -24px;
+      background:
+        radial-gradient(circle, rgba(255, 231, 173, 0.22), transparent 38%),
+        conic-gradient(from 20deg, rgba(255, 231, 173, 0), rgba(255, 231, 173, 0.76), rgba(99, 216, 255, 0.2), rgba(255, 231, 173, 0) 78%);
+      filter: blur(1px);
+      mask-image: radial-gradient(circle, transparent 0 48%, black 49% 58%, transparent 61%);
+      animation: spin 10s linear infinite;
+    }
+
+    .intro-mark::after {
+      inset: -16px;
+      border: 1px dashed rgba(99, 216, 255, 0.2);
+      box-shadow: 0 0 42px rgba(215, 166, 73, 0.22), inset 0 0 28px rgba(255, 231, 173, 0.12);
+      animation: spin 18s linear infinite;
+    }
+
+    .intro-mark img {
+      width: clamp(72px, 8.8vh, 94px);
+      height: clamp(72px, 8.8vh, 94px);
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 0 34px rgba(215, 166, 73, 0.42), 0 0 80px rgba(255, 231, 173, 0.14);
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 980px;
+      font-size: clamp(46px, 7.2vw, 92px);
+      line-height: 0.84;
+      letter-spacing: 0;
+      animation: introLift 680ms 90ms ease both;
+    }
+
+    .gold-text {
+      display: block;
+      color: transparent;
+      background: linear-gradient(95deg, #fff6d8 0%, #e3b958 24%, #7b531d 46%, #ffe7ad 60%, #c48732 82%, #fff0bd 100%);
+      background-size: 220% 100%;
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 18px 60px rgba(215, 166, 73, 0.18);
+      animation: goldSweep 7s ease-in-out infinite;
+    }
+
+    .tagline {
+      display: block;
+      margin-top: calc(var(--stack-space) * 0.62);
+      font-size: clamp(24px, 3.7vw, 46px);
+      line-height: 1;
+    }
+
+    .lede {
+      max-width: 650px;
+      margin: 0;
+      color: #d9e2e6;
+      font-size: clamp(16px, 1.7vw, 19px);
+      line-height: 1.48;
+      animation: introLift 720ms 140ms ease both;
+    }
+
+    .app-launches {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(220px, 1fr));
+      gap: 16px;
+      width: min(620px, 100%);
+      margin-top: 0;
+      animation: introLift 760ms 180ms ease both;
+    }
+
+    .app-symbol {
+      min-height: clamp(112px, 14vh, 136px);
+      display: grid;
+      align-content: center;
+      justify-items: center;
+      gap: 8px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      background:
+        radial-gradient(circle at 50% 0%, rgba(255, 231, 173, 0.16), transparent 9rem),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.025)),
+        rgba(10, 13, 16, 0.82);
+      box-shadow: 0 22px 70px rgba(0, 0, 0, 0.34);
+      position: relative;
+      overflow: hidden;
+      transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+    }
+
+    .app-symbol::before {
+      content: "";
+      position: absolute;
+      width: 150%;
+      aspect-ratio: 1;
+      top: 50%;
+      left: 50%;
+      opacity: 0;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 231, 173, 0.22);
+      background:
+        radial-gradient(circle, transparent 0 58%, rgba(255, 231, 173, 0.08) 59%, transparent 66%),
+        conic-gradient(from 90deg, transparent, rgba(215, 166, 73, 0.3), transparent 35%, rgba(99, 216, 255, 0.18), transparent 70%);
+      filter: blur(1px);
+      transform: translate(-50%, -50%);
+      transition: opacity 180ms ease;
+      animation: symbolAuraSpin 18s linear infinite;
+    }
+
+    .app-symbol:hover {
+      transform: translateY(-5px);
+      border-color: rgba(255, 231, 173, 0.48);
+      box-shadow: 0 30px 96px rgba(0, 0, 0, 0.48), 0 0 44px rgba(215, 166, 73, 0.12);
+    }
+
+    .app-symbol:hover::before {
+      opacity: 1;
+    }
+
+    .symbol-icon,
+    .app-symbol strong,
+    .app-symbol span {
+      position: relative;
+      z-index: 1;
+    }
+
+    .symbol-icon {
+      width: 50px;
+      height: 50px;
+      display: grid;
+      place-items: center;
+      color: var(--gold-2);
+      border: 1px solid rgba(255, 231, 173, 0.4);
+      background: rgba(215, 166, 73, 0.1);
+      box-shadow: inset 0 0 26px rgba(215, 166, 73, 0.08), 0 0 32px rgba(215, 166, 73, 0.18);
+    }
+
+    .symbol-icon svg {
+      width: 25px;
+      height: 25px;
+    }
+
+    .app-symbol strong {
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+
+    .app-symbol span {
+      color: var(--muted);
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 12px;
+      text-align: center;
+      overflow-wrap: anywhere;
+    }
+
+    .app-symbol.secondary {
+      grid-column: 1 / -1;
+      width: min(250px, 100%);
+      min-height: 62px;
+      justify-self: center;
+      grid-template-columns: 34px minmax(0, 1fr);
+      justify-items: start;
+      align-content: center;
+      text-align: left;
+      gap: 10px;
+      padding: 8px 12px;
+    }
+
+    .app-symbol.secondary .symbol-icon {
+      width: 34px;
+      height: 34px;
+      grid-row: span 2;
+    }
+
+    .app-symbol.secondary .symbol-icon svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .app-symbol.secondary strong {
+      font-size: 15px;
+    }
+
+    .app-symbol.secondary span:not(.symbol-icon) {
+      font-size: 10px;
+    }
+
+    .app-symbol.secondary span {
+      text-align: left;
+    }
+
+    .feature-ticker {
+      width: min(1040px, 100%);
+      margin: 0 auto;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: rgba(8, 11, 14, 0.72);
+      backdrop-filter: blur(18px);
+      mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+    }
+
+    .ticker-track {
+      display: flex;
+      width: max-content;
+      gap: 10px;
+      padding: 8px;
+      animation: tickerMove 28s linear infinite;
+    }
+
+    .feature-ticker:hover .ticker-track {
+      animation-play-state: paused;
+    }
+
+    .ticker-tile {
+      min-width: 190px;
+      min-height: 54px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.045);
+      padding: 8px 12px;
+    }
+
+    .ticker-tile strong {
+      display: block;
+      color: #fff1c7;
+      font-size: 14px;
+    }
+
+    .ticker-tile span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    @keyframes goldSweep {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    @keyframes introLift {
+      from { opacity: 0; transform: translateY(22px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes symbolAuraSpin {
+      from { transform: translate(-50%, -50%) rotate(0deg); }
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    @keyframes tickerMove {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    @keyframes sparkTravel {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) rotate(var(--angle)) translateY(6.5rem) scale(0.6);
+      }
+      12% {
+        opacity: 0.95;
+      }
+      70% {
+        opacity: 0.55;
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) rotate(var(--angle)) translateY(var(--distance)) scale(0.35);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 1ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 1ms !important;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .page {
+        padding: 16px 12px 10px;
+        min-height: 100svh;
+        height: auto;
+        overflow: visible;
+      }
+
+      .hero {
+        padding-top: 0;
+      }
+
+      .intro-mark {
+        width: 92px;
+        height: 92px;
+      }
+
+      .intro-mark img {
+        width: 78px;
+        height: 78px;
+      }
+
+      h1 {
+        font-size: 46px;
+      }
+
+      .tagline {
+        max-width: 340px;
+        font-size: 27px;
+      }
+
+      .lede {
+        max-width: 330px;
+        font-size: 15px;
+      }
+
+      .app-launches {
+        grid-template-columns: 1fr;
+        width: 100%;
+      }
+
+      .feature-ticker {
+        margin-top: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="spark-field" aria-hidden="true">
+      <i class="spark" style="--angle:-116deg; --distance:440px; --delay:-1s; --duration:10s;"></i>
+      <i class="spark" style="--angle:-102deg; --distance:410px; --delay:-5s; --duration:12s; --color:rgba(99,216,255,.72);"></i>
+      <i class="spark" style="--angle:-86deg; --distance:455px; --delay:-8s; --duration:11s;"></i>
+      <i class="spark" style="--angle:-70deg; --distance:430px; --delay:-3s; --duration:13s; --color:rgba(99,216,255,.68);"></i>
+      <i class="spark" style="--angle:-54deg; --distance:460px; --delay:-6s; --duration:10.5s;"></i>
+      <i class="spark" style="--angle:-38deg; --distance:430px; --delay:-9s; --duration:12.5s;"></i>
+      <i class="spark" style="--angle:34deg; --distance:390px; --delay:-2s; --duration:11.5s; --color:rgba(99,216,255,.7);"></i>
+      <i class="spark" style="--angle:52deg; --distance:420px; --delay:-7s; --duration:13s;"></i>
+      <i class="spark" style="--angle:74deg; --distance:400px; --delay:-4s; --duration:10s; --color:rgba(99,216,255,.65);"></i>
+      <i class="spark" style="--angle:104deg; --distance:430px; --delay:-10s; --duration:12s;"></i>
+      <i class="spark" style="--angle:-128deg; --distance:470px; --delay:-2.8s; --duration:14s; --color:rgba(255,231,173,.68);"></i>
+      <i class="spark" style="--angle:-94deg; --distance:500px; --delay:-11.5s; --duration:15s; --color:rgba(255,231,173,.76);"></i>
+      <i class="spark" style="--angle:-78deg; --distance:455px; --delay:-6.8s; --duration:14.5s; --color:rgba(99,216,255,.58);"></i>
+      <i class="spark" style="--angle:-62deg; --distance:485px; --delay:-12.4s; --duration:13.5s; --color:rgba(255,231,173,.7);"></i>
+      <i class="spark" style="--angle:-46deg; --distance:440px; --delay:-1.6s; --duration:15.5s; --color:rgba(99,216,255,.56);"></i>
+      <i class="spark" style="--angle:-22deg; --distance:455px; --delay:-8.4s; --duration:14s; --color:rgba(255,231,173,.66);"></i>
+      <i class="spark" style="--angle:18deg; --distance:420px; --delay:-5.5s; --duration:15s; --color:rgba(99,216,255,.55);"></i>
+      <i class="spark" style="--angle:42deg; --distance:475px; --delay:-13.2s; --duration:14.5s; --color:rgba(255,231,173,.72);"></i>
+      <i class="spark" style="--angle:66deg; --distance:460px; --delay:-9.6s; --duration:13.5s; --color:rgba(99,216,255,.58);"></i>
+      <i class="spark" style="--angle:88deg; --distance:490px; --delay:-3.7s; --duration:15.5s; --color:rgba(255,231,173,.68);"></i>
+      <i class="spark" style="--angle:116deg; --distance:450px; --delay:-7.8s; --duration:14s; --color:rgba(99,216,255,.52);"></i>
+      <i class="spark" style="--angle:134deg; --distance:470px; --delay:-12.9s; --duration:16s; --color:rgba(255,231,173,.62);"></i>
+      <i class="spark" style="--angle:160deg; --distance:430px; --delay:-2.2s; --duration:13.5s; --color:rgba(99,216,255,.56);"></i>
+      <i class="spark" style="--angle:178deg; --distance:470px; --delay:-9.1s; --duration:15s; --color:rgba(255,231,173,.7);"></i>
+      <i class="spark" style="--angle:198deg; --distance:450px; --delay:-5.9s; --duration:14.5s; --color:rgba(99,216,255,.58);"></i>
+      <i class="spark" style="--angle:220deg; --distance:490px; --delay:-12.1s; --duration:16s; --color:rgba(255,231,173,.64);"></i>
+      <i class="spark" style="--angle:242deg; --distance:440px; --delay:-4.7s; --duration:13s; --color:rgba(99,216,255,.52);"></i>
+      <i class="spark" style="--angle:264deg; --distance:500px; --delay:-10.8s; --duration:15.5s; --color:rgba(255,231,173,.68);"></i>
+      <i class="spark" style="--angle:286deg; --distance:455px; --delay:-7.2s; --duration:14s; --color:rgba(99,216,255,.54);"></i>
+      <i class="spark" style="--angle:308deg; --distance:475px; --delay:-13.5s; --duration:16s; --color:rgba(255,231,173,.62);"></i>
+      <i class="spark" style="--angle:332deg; --distance:445px; --delay:-1.9s; --duration:13.8s; --color:rgba(99,216,255,.57);"></i>
+    </div>
+
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-inner">
+        <a class="intro-mark" href="https://simbaops.com" aria-label="Open SimbaOps homepage">
+          <img src="assets/simba-logo.webp" alt="SimbaOps lion logo">
+        </a>
+        <h1 id="hero-title">
+          <span class="gold-text">SimbaOps</span>
+          <span class="tagline">Flight ops tools with charge.</span>
+        </h1>
+        <p class="lede">Pick a tool and get moving. SimbaOps keeps mission timing and alternate watch workflows fast, focused, and easy to launch.</p>
+
+        <div class="app-launches" id="tools" aria-label="Launch SimbaOps apps">
+          <a class="app-symbol" href="https://kc135calc.simbaops.com" aria-label="Open KC-135 Time Calc">
+            <span class="symbol-icon">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 17h16M7 13l5-8 5 8M9 17l3-5 3 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <strong>KC-135 Time Calc</strong>
+            <span>kc135calc.simbaops.com</span>
+          </a>
+          <a class="app-symbol" href="https://alternatewatch.simbaops.com" aria-label="Open Alternate Watch">
+            <span class="symbol-icon">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 2M4 4l3 3M20 4l-3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <strong>Alternate Watch</strong>
+            <span>alternatewatch.simbaops.com</span>
+          </a>
+          <a class="app-symbol secondary" href="https://alternateplanning.simbaops.com" aria-label="Open Alternate Planning">
+            <span class="symbol-icon">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 5h16v14H4z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M8 9h8M8 13h5M17 13l2 2-3 3-2-2 3-3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <strong>Alternate Planning</strong>
+            <span>alternateplanning.simbaops.com</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="feature-ticker" aria-label="SimbaOps highlights">
+      <div class="ticker-track">
+        <div class="ticker-tile"><strong>Fast Launch</strong><span>Click and go.</span></div>
+        <div class="ticker-tile"><strong>Dark Mode</strong><span>Calm, focused, readable.</span></div>
+        <div class="ticker-tile"><strong>Ops Focused</strong><span>Built around real workflows.</span></div>
+        <div class="ticker-tile"><strong>Zulu Ready</strong><span>Time math without the mess.</span></div>
+        <div class="ticker-tile"><strong>Watch Smart</strong><span>Alternates at a glance.</span></div>
+        <div class="ticker-tile"><strong>Direct Routes</strong><span>Clean app subdomains.</span></div>
+        <div class="ticker-tile"><strong>Fast Launch</strong><span>Click and go.</span></div>
+        <div class="ticker-tile"><strong>Dark Mode</strong><span>Calm, focused, readable.</span></div>
+        <div class="ticker-tile"><strong>Ops Focused</strong><span>Built around real workflows.</span></div>
+        <div class="ticker-tile"><strong>Zulu Ready</strong><span>Time math without the mess.</span></div>
+        <div class="ticker-tile"><strong>Watch Smart</strong><span>Alternates at a glance.</span></div>
+        <div class="ticker-tile"><strong>Direct Routes</strong><span>Clean app subdomains.</span></div>
+      </div>
+    </section>
+
+  </main>
+</body>
+</html>
