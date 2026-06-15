@@ -4,15 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SimbaOps</title>
-  <meta name="description" content="SimbaOps is a fast, focused launch hub for flight ops tools including KC-135 Time Calc and Alternate Watch.">
+  <meta name="description" content="SimbaOps is a fast, focused launch hub for flight ops tools including KC-135 Time Calc, Crosswind Calc, and Alternate Watch.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://simbaops.com/">
   <meta property="og:title" content="SimbaOps">
-  <meta property="og:description" content="Flight ops tools with charge. Launch KC-135 Time Calc and Alternate Watch from one focused hub.">
+  <meta property="og:description" content="Flight ops tools with charge. Launch KC-135 Time Calc, Crosswind Calc, and Alternate Watch from one focused hub.">
   <meta property="og:image" content="https://simbaops.com/assets/simba-logo.webp">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="SimbaOps">
-  <meta name="twitter:description" content="Flight ops tools with charge. Launch KC-135 Time Calc and Alternate Watch from one focused hub.">
+  <meta name="twitter:description" content="Flight ops tools with charge. Launch KC-135 Time Calc, Crosswind Calc, and Alternate Watch from one focused hub.">
   <meta name="twitter:image" content="https://simbaops.com/assets/simba-logo.webp">
   <link rel="canonical" href="https://simbaops.com/">
   <link rel="icon" href="assets/favicon.png" type="image/png">
@@ -224,9 +224,9 @@
 
     .app-launches {
       display: grid;
-      grid-template-columns: repeat(2, minmax(220px, 1fr));
+      grid-template-columns: repeat(3, minmax(190px, 1fr));
       gap: 16px;
-      width: min(620px, 100%);
+      width: min(940px, 100%);
       margin-top: 0;
       animation: introLift 760ms 180ms ease both;
     }
@@ -315,7 +315,7 @@
     }
 
     .app-symbol.secondary {
-      grid-column: 1 / -1;
+      grid-column: 2;
       width: min(250px, 100%);
       min-height: 62px;
       justify-self: center;
@@ -487,6 +487,11 @@
         width: 100%;
       }
 
+      .app-symbol.secondary {
+        grid-column: auto;
+        width: 100%;
+      }
+
       .feature-ticker {
         margin-top: 0;
       }
@@ -538,7 +543,7 @@
           <span class="gold-text">SimbaOps</span>
           <span class="tagline">Flight ops tools with charge.</span>
         </h1>
-        <p class="lede">Pick a tool and get moving. SimbaOps keeps mission timing and alternate watch workflows fast, focused, and easy to launch.</p>
+        <p class="lede">Pick a tool and get moving. SimbaOps keeps workflows fast, focused, and easy to launch.</p>
 
         <div class="app-launches" id="tools" aria-label="Launch SimbaOps apps">
           <a class="app-symbol" href="https://kc135calc.simbaops.com" aria-label="Open KC-135 Time Calc">
@@ -547,6 +552,13 @@
             </span>
             <strong>KC-135 Time Calc</strong>
             <span>kc135calc.simbaops.com</span>
+          </a>
+          <a class="app-symbol" href="https://xwindcalc.simbaops.com" aria-label="Open Crosswind Calc">
+            <span class="symbol-icon">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 8h10a3 3 0 1 0-3-3M4 13h15a2 2 0 1 1-2 2M4 18h8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 17l3 3M20 17l-3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </span>
+            <strong>Crosswind Calc</strong>
+            <span>xwindcalc.simbaops.com</span>
           </a>
           <a class="app-symbol" href="https://alternatewatch.simbaops.com" aria-label="Open Alternate Watch">
             <span class="symbol-icon">
